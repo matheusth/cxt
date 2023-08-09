@@ -69,10 +69,21 @@ void insert_text(size_t *buffer_cursor, char *buffer, size_t *buffer_size,
         text_size = free_space;
     }
     size_t shift = *buffer_size - *buffer_cursor;
-    memmove(buffer + *buffer_cursor + text_size, buffer + *buffer_cursor, shift);
+    memmove(buffer + *buffer_cursor + text_size, buffer + *buffer_cursor,
+            shift);
     memcpy(buffer + *buffer_cursor, text, text_size);
     *buffer_size += text_size;
     *buffer_cursor += text_size;
+}
+
+void erase_text(size_t *buffer_cursor, char *buffer, size_t *buffer_size) {
+
+    if (*buffer_size > 0 && *buffer_cursor > 0) {
+        *buffer_cursor -= 1;
+        memmove(buffer + *buffer_cursor, buffer + *buffer_cursor + 1, *buffer_size - *buffer_cursor);
+        buffer[*buffer_size] = '\0';
+        *buffer_size -= 1;
+    }
 }
 
 int main() {
@@ -102,11 +113,7 @@ int main() {
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
                 case SDLK_BACKSPACE:
-                    if (buffer_size > 0) {
-                        buffer_size -= 1;
-                        buffer_cursor--;
-                        buffer[buffer_size] = '\0';
-                    }
+                    erase_text(&buffer_cursor, buffer, &buffer_size);
                     break;
                 case SDLK_LEFT: {
                     if (buffer_cursor > 0) {

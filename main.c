@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
+#include <SDL2/SDL_keycode.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_ttf.h>
@@ -12,11 +13,9 @@
 #include <string.h>
 
 #define BUFFER_CAPACITY 1024
-#define UNHEX(color) \
-    ((color) >> (8*0)) & 0xFF, \
-    ((color) >> (8*1)) & 0xFF, \
-    ((color) >> (8*2)) & 0xFF, \
-    ((color) >> (8*3)) & 0xFF 
+#define UNHEX(color)                                                           \
+    ((color) >> (8 * 0)) & 0xFF, ((color) >> (8 * 1)) & 0xFF,                  \
+        ((color) >> (8 * 2)) & 0xFF, ((color) >> (8 * 3)) & 0xFF
 
 void scc(int code) {
     if (code < 0) {
@@ -95,6 +94,16 @@ int main() {
                         buffer[buffer_size] = '\0';
                     }
                     break;
+                case SDLK_LEFT: {
+                    if (buffer_cursor > 0) {
+                        buffer_cursor--;
+                    }
+                } break;
+                case SDLK_RIGHT: {
+                    if (buffer_cursor < buffer_size) {
+                        buffer_cursor++;
+                    }
+                }
                 }
                 break;
             case SDL_TEXTINPUT: {

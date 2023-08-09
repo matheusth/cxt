@@ -61,6 +61,20 @@ void render_cursor(SDL_Renderer *renderer, size_t buffer_cursor, TTF_Font *font,
     blink = !blink;
 }
 
+void insert_text(size_t *buffer_cursor, char *buffer, size_t *buffer_size,
+                 char *text) {
+    size_t text_size = strlen(text);
+    size_t free_space = BUFFER_CAPACITY - *buffer_size;
+    if (text_size > free_space) {
+        text_size = free_space;
+    }
+    size_t shift = *buffer_size - *buffer_cursor;
+    memmove(buffer + *buffer_cursor + text_size, buffer + *buffer_cursor, shift);
+    memcpy(buffer + *buffer_cursor, text, text_size);
+    *buffer_size += text_size;
+    *buffer_cursor += text_size;
+}
+
 int main() {
 
     char buffer[BUFFER_CAPACITY] = {0};
@@ -103,18 +117,12 @@ int main() {
                     if (buffer_cursor < buffer_size) {
                         buffer_cursor++;
                     }
-                }
+                } break;
                 }
                 break;
             case SDL_TEXTINPUT: {
-                size_t text_size = strlen(event.text.text);
-                size_t free_space = BUFFER_CAPACITY - buffer_size;
-                if (text_size > free_space) {
-                    text_size = free_space;
-                }
-                memcpy(buffer + buffer_size, event.text.text, text_size);
-                buffer_size += text_size;
-                buffer_cursor += text_size;
+                insert_text(&buffer_cursor, buffer, &buffer_size,
+                            event.text.text);
             } break;
             }
         }

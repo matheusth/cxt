@@ -6,11 +6,17 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_video.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-char *text = "Hello World!";
+#define BUFFER_CAPACITY 1024
+#define UNHEX(color) \
+    ((color) >> (8*0)) & 0xFF, \
+    ((color) >> (8*1)) & 0xFF, \
+    ((color) >> (8*2)) & 0xFF, \
+    ((color) >> (8*3)) & 0xFF 
 
 void scc(int code) {
     if (code < 0) {
@@ -42,13 +48,25 @@ void render_text(TTF_Font *font, SDL_Renderer *renderer, char *buffer,
     SDL_FreeSurface(font_surface);
     SDL_DestroyTexture(font_texture);
 }
-#define BUFFER_CAPACITY 1024
 
+void render_cursor(SDL_Renderer *renderer, size_t buffer_cursor, TTF_Font *font,
+                   char *buffer, Uint32 color) {
+    char *pre_cursor = (char *)calloc(buffer_cursor + 1, sizeof(char));
+    memcpy(pre_cursor, buffer, buffer_cursor);
+    int w = 0, h = 0;
+    TTF_SizeUTF8(font, pre_cursor, &w, &h);
+    SDL_Rect rect = {.x = w, .y = 0, .h = h, .w = 2};
+    bool blink = false;
+    SDL_SetRenderDrawColor(renderer, UNHEX(color));
+    SDL_RenderFillRect(renderer, &rect);
+    blink = !blink;
+}
 
 int main() {
 
     char buffer[BUFFER_CAPACITY] = {0};
     size_t buffer_size = 0;
+    size_t buffer_cursor = 0;
     scc(SDL_Init(SDL_INIT_VIDEO));
     scc(TTF_Init());
     TTF_Font *font = scp(TTF_OpenFont("FiraCodeNerdFontMono-Regular.ttf", 22));
@@ -71,12 +89,14 @@ int main() {
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
                 case SDLK_BACKSPACE:
-                    if(buffer_size > 0){
+                    if (buffer_size > 0) {
                         buffer_size -= 1;
+                        buffer_cursor--;
                         buffer[buffer_size] = '\0';
                     }
                     break;
-                }break;
+                }
+                break;
             case SDL_TEXTINPUT: {
                 size_t text_size = strlen(event.text.text);
                 size_t free_space = BUFFER_CAPACITY - buffer_size;
@@ -85,12 +105,14 @@ int main() {
                 }
                 memcpy(buffer + buffer_size, event.text.text, text_size);
                 buffer_size += text_size;
+                buffer_cursor += text_size;
             } break;
             }
         }
         scc(SDL_SetRenderDrawColor(renderer, 100, 0, 0, 0));
         scc(SDL_RenderClear(renderer));
         render_text(font, renderer, buffer, font_color);
+        render_cursor(renderer, buffer_cursor, font, buffer, 0xFFFFFFFF);
         SDL_RenderPresent(renderer);
     }
     SDL_DestroyRenderer(renderer);

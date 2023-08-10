@@ -8,6 +8,7 @@ jobs:
   CI:
     runs-on: ubuntu-22.04
     steps:
+      - uses: actions/checkout@main
       - name: install dependencies
         run: |
           sudo apt-get update

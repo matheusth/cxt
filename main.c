@@ -1,3 +1,4 @@
+#include "buffer.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
@@ -11,7 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "buffer.h"
 
 #define BUFFER_CAPACITY 1024
 #define UNHEX(color)                                                           \
@@ -109,9 +109,8 @@ int main() {
                 }
                 break;
             case SDL_TEXTINPUT: {
-                line_insert_text(&line, event.text.text,
-                            buffer_cursor);
-                buffer_cursor+= strlen(event.text.text);
+                line_insert_text(&line, event.text.text, buffer_cursor);
+                buffer_cursor += strlen(event.text.text);
             } break;
             }
         }

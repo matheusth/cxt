@@ -1,0 +1,19 @@
+name: CI-CD
+
+on:
+  push: ['main']
+
+jobs: 
+  CI:
+    run-on: ubuntu-latest
+    steps:
+      name: install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -qq libsdl2-dev libsdl2_ttf-dev
+      name: build cxt
+      run: |
+        make
+      env:
+        CC: clang
+

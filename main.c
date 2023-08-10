@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "buffer.h"
 
 #define BUFFER_CAPACITY 1024
 #define UNHEX(color)                                                           \
@@ -61,43 +62,9 @@ void render_cursor(SDL_Renderer *renderer, size_t buffer_cursor, TTF_Font *font,
     blink = !blink;
 }
 
-void insert_text(size_t *buffer_cursor, char *buffer, size_t *buffer_size,
-                 char *text) {
-    size_t text_size = strlen(text);
-    size_t free_space = BUFFER_CAPACITY - *buffer_size;
-    if (text_size > free_space) {
-        text_size = free_space;
-    }
-    size_t shift = *buffer_size - *buffer_cursor;
-    memmove(buffer + *buffer_cursor + text_size, buffer + *buffer_cursor,
-            shift);
-    memcpy(buffer + *buffer_cursor, text, text_size);
-    *buffer_size += text_size;
-    *buffer_cursor += text_size;
-}
-
-void erase_text_backspace(size_t *buffer_cursor, char *buffer, size_t *buffer_size) {
-
-    if (*buffer_size > 0 && *buffer_cursor > 0) {
-        *buffer_cursor -= 1;
-        memmove(buffer + *buffer_cursor, buffer + *buffer_cursor + 1, *buffer_size - *buffer_cursor);
-        buffer[*buffer_size] = '\0';
-        *buffer_size -= 1;
-    }
-}
-
-void erase_text_delete(size_t *buffer_cursor, char *buffer, size_t *buffer_size){
-    if (*buffer_size > 0 && *buffer_cursor < *buffer_size) {
-        memmove(buffer + *buffer_cursor, buffer + *buffer_cursor + 1, *buffer_size - *buffer_cursor);
-        buffer[*buffer_size] = '\0';
-        *buffer_size -= 1;
-    }
-}
-
 int main() {
 
-    char buffer[BUFFER_CAPACITY] = {0};
-    size_t buffer_size = 0;
+    Line line = {0};
     size_t buffer_cursor = 0;
     scc(SDL_Init(SDL_INIT_VIDEO));
     scc(TTF_Init());
@@ -121,10 +88,13 @@ int main() {
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
                 case SDLK_BACKSPACE:
-                    erase_text_backspace(&buffer_cursor, buffer, &buffer_size);
+                    if (buffer_cursor > 0) {
+                        line_backspace(&line, buffer_cursor);
+                        buffer_cursor--;
+                    }
                     break;
                 case SDLK_DELETE:
-                    erase_text_delete(&buffer_cursor, buffer, &buffer_size);
+                    line_delete(&line, buffer_cursor);
                     break;
                 case SDLK_LEFT: {
                     if (buffer_cursor > 0) {
@@ -132,22 +102,23 @@ int main() {
                     }
                 } break;
                 case SDLK_RIGHT: {
-                    if (buffer_cursor < buffer_size) {
+                    if (buffer_cursor < line.size) {
                         buffer_cursor++;
                     }
                 } break;
                 }
                 break;
             case SDL_TEXTINPUT: {
-                insert_text(&buffer_cursor, buffer, &buffer_size,
-                            event.text.text);
+                line_insert_text(&line, event.text.text,
+                            buffer_cursor);
+                buffer_cursor+= strlen(event.text.text);
             } break;
             }
         }
         scc(SDL_SetRenderDrawColor(renderer, 100, 0, 0, 0));
         scc(SDL_RenderClear(renderer));
-        render_text(font, renderer, buffer, font_color);
-        render_cursor(renderer, buffer_cursor, font, buffer, 0xFFFFFFFF);
+        render_text(font, renderer, line.chars, font_color);
+        render_cursor(renderer, buffer_cursor, font, line.chars, 0xFFFFFFFF);
         SDL_RenderPresent(renderer);
     }
     SDL_DestroyRenderer(renderer);

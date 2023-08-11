@@ -37,7 +37,7 @@ void render_text(TTF_Font *font, SDL_Renderer *renderer, char *buffer,
                  SDL_Color color) {
     int textW = 0, textH = 0;
 
-    SDL_Surface *font_surface = TTF_RenderText_Blended(font, buffer, color);
+    SDL_Surface *font_surface = TTF_RenderUTF8_Blended(font, buffer, color);
     SDL_Texture *font_texture =
         SDL_CreateTextureFromSurface(renderer, font_surface);
 

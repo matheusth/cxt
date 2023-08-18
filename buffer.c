@@ -33,9 +33,9 @@ void line_backspace(Line *line, size_t col){
     if (line->size > 0 && col > 0) {
         memmove(line->chars + col - 1, line->chars + col,
                 line->size - col);
-        line->size -= 1;
-        line->chars[line->size] = '\0';
-    }
+            line->size -= 1;
+            line->chars[line->size] = '\0';
+        } 
 }
 void line_delete(Line *line, size_t col){
     if (line->size > 0 && col < line->size) {

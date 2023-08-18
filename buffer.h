@@ -1,8 +1,9 @@
 #include <stdlib.h>
+#include <SDL2/SDL_types.h>
 #ifndef BUFFER_H_
 #define BUFFER_H_
 
-#define LINE_INIT_CAPACITY 4
+#define LINE_INIT_CAPACITY 1024
 
 typedef struct {
     size_t capacity;

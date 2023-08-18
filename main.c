@@ -89,6 +89,10 @@ int main() {
                 switch (event.key.keysym.sym) {
                 case SDLK_BACKSPACE:
                     if (buffer_cursor > 0) {
+                        if ((line.chars[buffer_cursor-1] & 0x0C0) == 0x080) {
+                            line_backspace(&line, buffer_cursor);
+                            buffer_cursor--;
+                        }
                         line_backspace(&line, buffer_cursor);
                         buffer_cursor--;
                     }

@@ -89,7 +89,7 @@ int main() {
                 switch (event.key.keysym.sym) {
                 case SDLK_BACKSPACE:
                     if (buffer_cursor > 0) {
-                        if ((line.chars[buffer_cursor-1] & 0x0C0) == 0x080) {
+                        if ((line.chars[buffer_cursor - 1] & 0x0C0) == 0x080) {
                             line_backspace(&line, buffer_cursor);
                             buffer_cursor--;
                         }
@@ -98,15 +98,22 @@ int main() {
                     }
                     break;
                 case SDLK_DELETE:
+                    if ((line.chars[buffer_cursor + 1] & 0x0C0) == 0x080) {
+                        line_delete(&line, buffer_cursor);
+                    }
                     line_delete(&line, buffer_cursor);
                     break;
                 case SDLK_LEFT: {
+                    if ((line.chars[buffer_cursor - 1] & 0x0C0) == 0x080)
+                        buffer_cursor--;
                     if (buffer_cursor > 0) {
                         buffer_cursor--;
                     }
                 } break;
                 case SDLK_RIGHT: {
                     if (buffer_cursor < line.size) {
+                        if ((line.chars[buffer_cursor + 1] & 0x0C0) == 0x080)
+                            buffer_cursor++;
                         buffer_cursor++;
                     }
                 } break;
